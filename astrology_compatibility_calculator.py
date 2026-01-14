@@ -1,3 +1,18 @@
+"""
+@file       astrology_compatibility_calculator.py
+@brief      Berechnet astrologische Transit-Scores basierend auf Geburtsdaten.
+@details    Nutzt die NASA JPL Horizons API für präzise Planetenpositionen. 
+            Erstellt eine Excel-Auswertung mit einem kombinierten Score-Diagramm 
+            und einer mehrstufigen X-Achse für Tierkreisübergänge.
+@author     A. KHOUK
+@date       2024-05-22
+@version    1.2
+@copyright  Copyright (c) 2024
+"""
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
 import pandas as pd
 import numpy as np
 from astroquery.jplhorizons import Horizons
@@ -8,11 +23,11 @@ from openpyxl.chart import LineChart, Reference
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-# ===============================
+# =============================================================================
 # KONFIGURATION
-# ===============================
+# =============================================================================
 GEBURTSDATUM = '1979-06-04 12:00'
-JAHR = 1987
+JAHR = 1993
 
 PLANET_IDS = {
     'Sonne': '10', 'Mond': '301', 'Merkur': '199', 'Venus': '299',
@@ -30,9 +45,9 @@ ZODIAC_START = {
     "Skorpion": "10-23", "Schütze": "11-22", "Steinbock": "12-22"
 }
 
-# ===============================
-# FUNKTIONEN (unverändert)
-# ===============================
+# =============================================================================
+# FUNKTIONEN
+# =============================================================================
 def fetch_birth_positions(date_str):
     jd = Time(date_str).jd
     pos = {}
@@ -73,9 +88,9 @@ def get_zodiac(degree):
         if degree < start: return signs[i-1][1] if i > 0 else signs[0][1]
     return signs[-1][1]
 
-# ===============================
+# =============================================================================
 # HAUPTLAUF
-# ===============================
+# =============================================================================
 birth_pos = fetch_birth_positions(GEBURTSDATUM)
 dates, year_data = fetch_year_positions(JAHR)
 
@@ -83,8 +98,8 @@ scores, mars_signs, venus_signs = [], [], []
 for i in range(len(dates)):
     transit_pos = {p: year_data[p][i] for p in PLANET_IDS}
     scores.append(calculate_score(birth_pos, transit_pos))
-    mars_signs.append(f"Mars in {get_zodiac(year_data['Mars'][i])}")
-    venus_signs.append(f"Venus in {get_zodiac(year_data['Venus'][i])}")
+    mars_signs.append(f"{get_zodiac(year_data['Mars'][i])}")
+    venus_signs.append(f"{get_zodiac(year_data['Venus'][i])}")
 
 df = pd.DataFrame({
     "Datum": [d.date() for d in dates],
@@ -108,9 +123,9 @@ for sign, start_md in ZODIAC_START.items():
         df.at[idx, 'Zodiac_Start'] = 100
         df.at[idx, 'Zodiac_Name'] = sign # Name wird in Spalte B eingetragen
 
-# ===============================
+# ==============================================================
 # Excel mit mehrstufiger Achse
-# ===============================
+# ==============================================================
 excel_path = f"Astrologie_Analyse_{JAHR}_DoppelAchse.xlsx"
 df.to_excel(excel_path, index=False)
 
@@ -141,3 +156,6 @@ ws.add_chart(chart, "I5")
 wb.save(excel_path)
 
 print(f"Fertig! In '{excel_path}' bilden Datum und Sternzeichen nun eine gemeinsame Achse.")
+# =============================================================================
+# ENDE
+# =============================================================================
