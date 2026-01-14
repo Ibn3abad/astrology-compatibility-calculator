@@ -5,7 +5,7 @@
             Erstellt eine Excel-Auswertung mit einem kombinierten Score-Diagramm 
             und einer mehrstufigen X-Achse für Tierkreisübergänge.
 @author     A. KHOUK
-@date       2024-05-22
+@date       2024-06-04
 @version    1.2
 @copyright  Copyright (c) 2024
 """
